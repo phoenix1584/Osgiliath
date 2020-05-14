@@ -1,3 +1,4 @@
 class Main {
-    main() : Int { 1 };
+    i : IO <- new IO; 
+    main() : Int { { i.out_string("Hello World!\n"); 1 ;} };
 };
