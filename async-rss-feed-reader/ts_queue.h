@@ -13,15 +13,65 @@ namespace rssreader{
                 tsqueue (const tsqueue<T>&) = delete;
                 virtual ~tsqueue() {clear();}
 
-                const T& front(){}
-                const T& back(){}
-                T pop_front(){}
-                T pop_back(){}
-                T push_back(){}
-                T push_front(){}
-                bool empty(){}
-                size_t count(){}
-                void clear(){}
+                const T& front(){
+                    std::scoped_lock lock(m_mux_queue);
+                    return m_deq.front();
+                }
+
+                const T& back(){
+                    std::scoped_lock lock(m_mux_queue);
+                    return m_deq.back();
+                }
+
+                T pop_front(){
+                    std::scoped_lock lock(m_mux_queue);
+                    auto t = std::move(m_deq.front());
+                    m_deq.pop_front();
+                    return t;
+                }
+
+                T pop_back(){
+                    std::scoped_lock lock(m_mux_queue);
+                    auto t = std::move(m_deq.back());
+                    m_deq.pop_back();
+                    return t;
+                }
+                
+                T push_back(const T& item){
+                    std::scoped_lock lock(m_mux_queue);
+                    m_deq.emplace_back(std::move(item));
+                    std::unique_lock<std::mutex> ul(m_mux_blocking);
+                    m_cv_blocking.notify_one();
+                }
+
+                T push_front(const T& item){
+                    std::scoped_lock lock(m_mux_queue);
+                    m_deq.emplace_front(std::move(item));
+                    std::unique_lock<std::mutex> ul(m_mux_blocking);
+                    m_cv_blocking.notify_one();
+                }
+                
+                bool empty(){
+                    std::scoped_lock lock(m_mux_queue);
+                    return m_deq.empty();
+                }
+                
+                size_t count(){
+                    std::scoped_lock lock(m_mux_queue);
+                    return m_deq.size();
+                }
+                
+                void clear(){
+                    std::scoped_lock lock(m_mux_queue);
+                    m_deq.clear();
+                }
+
+                void wait(){
+                    while(empty()){
+                        std::unique_lock<std::mutex> ul(m_mux_blocking);
+                        m_cv_blocking.wait(ul);
+                    }
+                }
             protected:
                 std::mutex m_mux_queue;
                 std::deque<T> m_deq;
