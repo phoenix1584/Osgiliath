@@ -7,11 +7,11 @@
 namespace rssreader{
     namespace networkcore{
         template<typename T>
-        class tsqueue{
+        class TSQueue{
             public:
-                tsqueue() = default;
-                tsqueue (const tsqueue<T>&) = delete;
-                virtual ~tsqueue() {clear();}
+                TSQueue() = default;
+                TSQueue (const TSQueue<T>&) = delete;
+                virtual ~TSQueue() {clear();}
 
                 const T& front(){
                     std::scoped_lock lock(m_mux_queue);
