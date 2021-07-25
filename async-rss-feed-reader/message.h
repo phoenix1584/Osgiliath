@@ -47,5 +47,19 @@ namespace rssreader{
             }
         };
 
-    }
+        template <typename T>
+        class connection;
+
+        template <typename T>
+        struct AssociatedMessage{
+            std::shared_ptr<connection<T>> remote = nullptr;
+            Message<T> m_message;
+
+            friend std::ostream& operator<<(std::ostream& os
+            , const AssociatedMessage<T>& msg){
+                os << msg.m_message;
+                return os;
+            }
+        };
+    };
 }
