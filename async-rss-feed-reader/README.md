@@ -19,6 +19,7 @@ Build a RSS feed server that can aggregate news periodically and can be accessed
 3. Abstract interfaces should be possible
 4. Logger
 5. More exception handling
+6. Versioning in the message/protocol.
 
 # Functionality For later
 1. Extend to be used a an HTTP server
