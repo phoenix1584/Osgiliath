@@ -2,6 +2,8 @@
 
 #define ASIO_STANDALONE
 #include "ts_queue.h"
+#include "server_interface.h"
+#include <thread>
 #include <iostream>
 #include <asio.hpp>
 #include <asio/ts/buffer.hpp>

@@ -1,8 +1,13 @@
 #pragma once
+#define ASIO_STANDALONE
 
+#include <cstdint>
+#include <thread>
+#include <asio.hpp>
+#include <asio/ts/buffer.hpp>
+#include <asio/ts/internet.hpp>
 #include "connection.h"
 #include "message.h"
-#include <cstdint>
 
 namespace rssreader {
 namespace networkcore {

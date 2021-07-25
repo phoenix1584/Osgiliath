@@ -1,5 +1,3 @@
-#pragma once
-
 #include <cstdint>
 #include <iostream>
 #include "connection.h"
@@ -50,7 +48,7 @@ public:
       m_connection->Send(message);
   }
 
-  TSQueue<AssociatedMessage<T>> &GetQueue() { return m_in_queue; }
+  TSQueue<AssociatedMessage<T>>& GetQueue() { return m_in_queue; }
 
 protected:
   asio::io_context m_asio_context;
