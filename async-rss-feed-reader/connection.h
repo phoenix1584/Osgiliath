@@ -2,6 +2,7 @@
 
 #define ASIO_STANDALONE
 #include "ts_queue.h"
+#include <iostream>
 #include <asio.hpp>
 #include <asio/ts/buffer.hpp>
 #include <asio/ts/internet.hpp>
@@ -22,7 +23,8 @@ public:
   Connection(Owner parent, asio::io_context &asio_context,
              asio::ip::tcp::socket socket,
              TSQueue<AssociatedMessage<T>> &input_q)
-             : m_asio_context(asio_context),m_socket(std::move(socket)),m_in_queue(input_q){
+      : m_asio_context(asio_context), m_socket(std::move(socket)),
+        m_in_queue(input_q) {
     m_owner = parent;
     if (m_owner == Owner::server) {
       m_handshake_out =
@@ -69,7 +71,7 @@ public:
       bool writing_in_progress = !m_out_queue.empty();
       m_out_queue.push_back(msg);
       if (writing_in_progress)
-        WriteHeader;
+        WriteHeader();
     });
   }
 
@@ -77,8 +79,8 @@ private:
   void WriteHeader() {
     asio::async_write(
         m_socket,
-        asio::buffer(&m_out_queue.front().m_header, sizeof(MessageHeader<T>))
-        ,[this](std::error_code ec, std::size_t length) {
+        asio::buffer(&m_out_queue.front().m_header, sizeof(MessageHeader<T>)),
+        [this](std::error_code ec, std::size_t length) {
           if (!ec) {
             if (m_out_queue.front().m_body.size() > 0) {
               WriteBody();
@@ -131,16 +133,17 @@ private:
   }
 
   void ReadBody() {
-      asio::async_read(m_socket
-      ,asio::buffer(m_transient_message.m_body.data(),m_transient_message.m_body.size())
-      ,[this](std::error_code ec, std::size_t length){
-          if(!ec){
-              Enqueue();
-          }else{
-            std::cout << "[" << m_id << "] Read Body Failed.\n";
-            m_socket.close();
-          }
-      });
+    asio::async_read(m_socket,
+                     asio::buffer(m_transient_message.m_body.data(),
+                                  m_transient_message.m_body.size()),
+                     [this](std::error_code ec, std::size_t length) {
+                       if (!ec) {
+                         Enqueue();
+                       } else {
+                         std::cout << "[" << m_id << "] Read Body Failed.\n";
+                         m_socket.close();
+                       }
+                     });
   }
 
   // Some random bit magic as an illustration for the handshake.
@@ -152,39 +155,40 @@ private:
 
   // Faclitates a simple handshake mechanism
   void ReadValidation(ServerInterface<T> *server = nullptr) {
-      asio::async_read(m_socket
-      ,asio::buffer(&m_handshake_in, sizeof(uint64_t))
-      ,[this,server](std::error_code ec,std::size_t length){
-          if(!ec){
-              if(m_owner == Owner::server){
-                  if(m_handshake_in == m_handshake_check){
-                      std::cout << "Client Validated successfully.\n";
-                      server->OnClientValidated(this->shared_from_this());
-                      ReadHeader();
-                  }
-              }else{
-                  std::cout << "Client Failed Validation. Terminating connection.\n";
-                  m_socket.close();
+    asio::async_read(
+        m_socket, asio::buffer(&m_handshake_in, sizeof(uint64_t)),
+        [this, server](std::error_code ec, std::size_t length) {
+          if (!ec) {
+            if (m_owner == Owner::server) {
+              if (m_handshake_in == m_handshake_check) {
+                std::cout << "Client Validated successfully.\n";
+                server->OnClientValidated(this->shared_from_this());
+                ReadHeader();
               }
-          }else{
-              m_handshake_out = Scramble(m_handshake_in);
-              WriteValidation();
+            } else {
+              std::cout
+                  << "Client Failed Validation. Terminating connection.\n";
+              m_socket.close();
+            }
+          } else {
+            m_handshake_out = Scramble(m_handshake_in);
+            WriteValidation();
           }
-      });
+        });
   }
-  
+
   // Faclitates a simple handshake mechanism
   void WriteValidation() {
-      asio::async_write(m_socket
-      ,asio::buffer(&m_handshake_out,sizeof(uint64_t))
-      ,[this](std::error_code ec, std::size_t length){
-          if(!ec){
-              if(m_owner == Owner::server)
-                ReadHeader();
-          }else{
-              m_socket.close();
-          }
-      });
+    asio::async_write(m_socket,
+                      asio::buffer(&m_handshake_out, sizeof(uint64_t)),
+                      [this](std::error_code ec, std::size_t length) {
+                        if (!ec) {
+                          if (m_owner == Owner::server)
+                            ReadHeader();
+                        } else {
+                          m_socket.close();
+                        }
+                      });
   }
 
   void Enqueue() {
@@ -197,10 +201,10 @@ private:
   }
 
 protected:
-  asio::io_context& m_asio_context;
+  asio::io_context &m_asio_context;
   asio::ip::tcp::socket m_socket;
   TSQueue<rssreader::networkcore::Message<T>> m_out_queue;
-  TSQueue<AssociatedMessage<T>>& m_in_queue;
+  TSQueue<AssociatedMessage<T>> &m_in_queue;
   Message<T> m_transient_message;
   Owner m_owner = Owner::server;
   uint32_t m_id = 0;
