@@ -54,7 +54,7 @@ namespace rssreader{
                                 if(OnClientConnect(new_conn)){
                                     m_conn_queue.push_back(std::move(new_conn));
                                     m_conn_queue.back()->ConnectToClient(this,m_client_identifier++);
-                                    std::cout << "[" << m_conn_queue.back->GetID() << "] Connection Approved\n";
+                                    std::cout << "[" << m_conn_queue.back()->GetID() << "] Connection Approved\n";
                                 }else{
                                     std::cout << "[XXXX] Connection Denied";
                                 }
@@ -103,7 +103,7 @@ namespace rssreader{
                     }
                 }
 
-                virtual void OnClientValidate(std::shared_ptr<Connection<T>> client){}
+                virtual void OnClientValidated(std::shared_ptr<Connection<T>> client){}
 
             protected:
                 virtual bool OnClientConnect(std::shared_ptr<Connection<T>> client){ return false; }

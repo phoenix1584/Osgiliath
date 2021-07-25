@@ -1,3 +1,12 @@
 #include "client_interface.h"
+#include "commands.h"
 
-int main(){ return 0;}
+class TestClient: public rssreader::networkcore::ClientInterface<RSSCommand>{
+    public:
+        TestClient();
+};
+
+int main(){ 
+    
+    return 0;
+}

@@ -21,7 +21,8 @@ public:
 
   Connection(Owner parent, asio::io_context &asio_context,
              asio::ip::tcp::socket socket,
-             TSQueue<AssociatedMessage<T>> &input_q) {
+             TSQueue<AssociatedMessage<T>> &input_q)
+             : m_asio_context(asio_context),m_socket(std::move(socket)),m_in_queue(input_q){
     m_owner = parent;
     if (m_owner == Owner::server) {
       m_handshake_out =
@@ -156,7 +157,7 @@ private:
       ,[this,server](std::error_code ec,std::size_t length){
           if(!ec){
               if(m_owner == Owner::server){
-                  if(m_handshake_in = m_handshake_check){
+                  if(m_handshake_in == m_handshake_check){
                       std::cout << "Client Validated successfully.\n";
                       server->OnClientValidated(this->shared_from_this());
                       ReadHeader();
@@ -196,10 +197,10 @@ private:
   }
 
 protected:
+  asio::io_context& m_asio_context;
   asio::ip::tcp::socket m_socket;
-  asio::io_context &m_asio_context;
   TSQueue<rssreader::networkcore::Message<T>> m_out_queue;
-  TSQueue<AssociatedMessage<T>> &m_in_queue;
+  TSQueue<AssociatedMessage<T>>& m_in_queue;
   Message<T> m_transient_message;
   Owner m_owner = Owner::server;
   uint32_t m_id = 0;

@@ -37,14 +37,14 @@ namespace rssreader{
                     return t;
                 }
                 
-                T push_back(const T& item){
+                void push_back(const T& item){
                     std::scoped_lock lock(m_mux_queue);
                     m_deq.emplace_back(std::move(item));
                     std::unique_lock<std::mutex> ul(m_mux_blocking);
                     m_cv_blocking.notify_one();
                 }
 
-                T push_front(const T& item){
+                void push_front(const T& item){
                     std::scoped_lock lock(m_mux_queue);
                     m_deq.emplace_front(std::move(item));
                     std::unique_lock<std::mutex> ul(m_mux_blocking);
