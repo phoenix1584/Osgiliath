@@ -8,6 +8,13 @@ class TestClient: public rssreader::networkcore::ClientInterface<RSSCommand>{
 int main(){ 
     TestClient tclient;
     tclient.Connect("127.0.0.1",10000);
+    
+    if(tclient.IsConnected()){
+        rssreader::networkcore::Message<RSSCommand> greeting;
+        greeting.m_header.m_id = RSSCommand::Client_Register;
+        tclient.Send(greeting);
+    }
+    
     bool ugly_quit = false;
     while(!ugly_quit){
         if(tclient.IsConnected()){
