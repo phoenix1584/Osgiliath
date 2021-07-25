@@ -1,7 +1,7 @@
 TARGETS =  $(patsubst %.cc,%,$(wildcard *.cc))
 CPPFLAGS += -std=c++17 -Wall
 
-program_INCLUDE_DIRS :=
+program_INCLUDE_DIRS := /data/CodeBase/asio-1.18.2/include/
 program_LIBRARY_DIRS :=
 program_LIBRARIES := pthread
 

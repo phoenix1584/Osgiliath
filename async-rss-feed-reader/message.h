@@ -4,9 +4,10 @@
 #include <iostream>
 #include <memory>
 #include <cstring>
+#include "connection.h"
 
 namespace rssreader{
-    namespace protocol{
+    namespace networkcore{
         template<typename T>
         struct MessageHeader{
             T m_id{};
@@ -48,11 +49,11 @@ namespace rssreader{
         };
 
         template <typename T>
-        class connection;
+        class Connection;
 
         template <typename T>
         struct AssociatedMessage{
-            std::shared_ptr<connection<T>> remote = nullptr;
+            std::shared_ptr<rssreader::networkcore::Connection<T>> remote = nullptr;
             Message<T> m_message;
 
             friend std::ostream& operator<<(std::ostream& os
